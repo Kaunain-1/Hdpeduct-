@@ -3125,6 +3125,31 @@
     body[data-theme="light"] .catalog-section .catalog-category.active { border-color: #ff824d; color: #fff; background: #df6738; }
     body[data-theme="light"] .catalog-section .catalog-category.active span { color: #fff; }
     body[data-theme="light"] .catalog-section .catalog-footer { color: #b6c4cd; }
+    .category-card { min-height: 258px; padding: 13px; }
+    .category-art { height: 174px; }
+    .category-card h3 { font-size: calc(11.2px * 1.2); }
+    .catalog-category { min-height: 43px; padding: 0 14px; font-size: calc(10.08px * 1.2); }
+    .catalog-category span { font-size: calc(8.96px * 1.2); }
+    .catalog-card { position: relative; cursor: pointer; transition: transform .38s cubic-bezier(.2,.8,.2,1),box-shadow .38s ease,border-color .3s ease; }
+    .catalog-card:hover,.catalog-card:focus-visible { z-index: 2; transform: translateY(-6px) scale(1.04); box-shadow: 0 24px 52px #0808109c; }
+    .catalog-card:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    @keyframes card-pop { from { opacity: 0; } to { opacity: 1; } }
+    .catalog-card-art { height: 209px; }
+    .catalog-card-body { padding: 19px 20px 18px; }
+    .catalog-card-body h3 { font-size: calc(13.44px * 1.2); }
+    .catalog-card-body p { min-height: 38px; font-size: calc(11.2px * 1.2); }
+    .catalog-card-actions .catalog-inquiry,.catalog-direct-inquiry { min-height: 44px; font-size: calc(8.96px * 1.2); }
+    .footer-bottom-links a.designer-credit { color: inherit; text-decoration: none; }
+    .footer-bottom-links a.designer-credit:hover,.footer-bottom-links a.designer-credit:focus-visible { color: inherit; text-decoration: none; }
+    @media (max-width:620px) {
+      .category-art { height: 131px; }
+      .catalog-card-art { height: 148px; }
+      .catalog-card-body { padding: 13px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .catalog-card { transition: none; }
+      .catalog-card:hover,.catalog-card:focus-visible { transform: none; }
+    }
     @media (max-width:620px) {
       .brand .brand-mark { width: 122px; height: 48px; }
       #adminView .admin-heading .brand-mark { width: 105px; height: 46px; }
@@ -3309,7 +3334,7 @@
     </div>
     <div class="container footer-bottom">
       <span>© 2026 Hdpeduct. All rights reserved.</span>
-      <div class="footer-bottom-links"><span>Designed by Kaunain</span><a href="#contact">Privacy Policy</a><a href="#contact">Terms of Service</a></div>
+      <div class="footer-bottom-links"><a class="designer-credit" href="mailto:kaunain0514@gmail.com">Designed by Kaunain</a><a href="#contact">Privacy Policy</a><a href="#contact">Terms of Service</a></div>
     </div>
   </footer>
 
@@ -3775,7 +3800,7 @@
             const catalogueNumber = String(products.indexOf(product) + 1).padStart(2, "0");
             const productImage = getProductImages(product)[0];
             return `
-            <article class="catalog-card reveal" style="--card-order:${index % 8}">
+            <article class="catalog-card reveal" data-product-card="${escapeHtml(product.id)}" tabindex="0" aria-label="Open details for ${escapeHtml(product.name)}" style="--card-order:${index % 8}">
               <div class="catalog-card-art ${productImage ? "has-image" : ""}">
                 <span class="catalog-card-number">${catalogueNumber}</span>
                 ${productImage ? `<img class="catalog-card-image" src="${escapeHtml(productImage)}" alt="${escapeHtml(product.name)}" loading="lazy">` : `<span class="catalog-product-shape shape-${index % 5}" aria-hidden="true"><i></i></span>`}
@@ -3795,6 +3820,17 @@
           : `<div class="catalog-empty"><span>⌕</span><h3>No matching products</h3><p>Try another product name, size, or category.</p><button type="button" id="resetCatalogue">Clear filters</button></div>`;
         $$("#catalogGroups [data-view-product]").forEach(button => button.addEventListener("click", () => openProductDetail(button.dataset.viewProduct, button)));
         $$("#catalogGroups [data-inquiry-product]").forEach(button => button.addEventListener("click", () => openContactForProduct(button.dataset.inquiryProduct)));
+        $$("#catalogGroups [data-product-card]").forEach(card => {
+          card.addEventListener("click", event => {
+            if (event.target.closest("button,a,input,select,textarea")) return;
+            openProductDetail(card.dataset.productCard, card);
+          });
+          card.addEventListener("keydown", event => {
+            if (event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
+            event.preventDefault();
+            openProductDetail(card.dataset.productCard, card);
+          });
+        });
         observeReveals();
         const reset = $("#resetCatalogue");
         if (reset) reset.addEventListener("click", () => {
