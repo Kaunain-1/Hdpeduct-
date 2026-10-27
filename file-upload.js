@@ -92,7 +92,7 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-// 6. POST Upload Endpoint
+// 6. POST Upload Endpoint - saves images to server disk under ./images/
 app.post('/upload', (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -108,6 +108,7 @@ app.post('/upload', (req, res) => {
     const protocol = req.protocol;
     const host = req.get('host');
 
+    // Return root-relative imageUrl for cross-device compatibility (PC, mobile, Render, localhost)
     res.status(200).json({
       message: 'File uploaded successfully!',
       filename: req.file.filename,
@@ -117,7 +118,8 @@ app.post('/upload', (req, res) => {
         mimetype: req.file.mimetype,
         size: req.file.size
       },
-      imageUrl: `${protocol}://${host}/images/${req.file.filename}`
+      imageUrl: `/images/${req.file.filename}`,
+      fullUrl: `${protocol}://${host}/images/${req.file.filename}`
     });
   });
 });
